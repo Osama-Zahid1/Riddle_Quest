@@ -86,6 +86,7 @@
         .riddle-card { height: 12rem; background: linear-gradient(135deg, #1e3a8a, #dc2626); border: 2px solid rgba(30, 58, 138, 0.5); border-radius: 1rem; cursor: pointer; position: relative; overflow: hidden; transition: all 0.3s ease; animation: cardSlideIn 0.6s ease both; perspective: 1000px; }
         body.light-theme .riddle-card { background: linear-gradient(135deg, #93c5fd, #f9a8d4); border-color: rgba(147, 197, 253, 0.5); }
         .riddle-card.solved { background: linear-gradient(135deg, #10b981, #059669); border-color: rgba(16, 185, 129, 0.5); }
+        .riddle-card.unsolved { background: linear-gradient(135deg, #6b7280, #4b5563); border-color: rgba(107, 114, 128, 0.5); }
         .riddle-card:hover { transform: translateY(-10px) rotateX(5deg) scale(1.05); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); }
         .riddle-card.shake { animation: shake 0.5s ease; }
         .riddle-card:nth-child(1) { animation-delay: 0.1s; } .riddle-card:nth-child(2) { animation-delay: 0.2s; } .riddle-card:nth-child(3) { animation-delay: 0.3s; } .riddle-card:nth-child(4) { animation-delay: 0.4s; } .riddle-card:nth-child(5) { animation-delay: 0.5s; } .riddle-card:nth-child(6) { animation-delay: 0.6s; }
@@ -97,6 +98,7 @@
         body.light-theme .card-content { color: #1f2937; }
         .card-emoji { font-size: 2.5rem; margin-bottom: 1rem; animation: emojiFloat 2s ease-in-out infinite alternate; }
         .solved .card-emoji { animation: solvedSpin 0.5s ease, emojiFloat 2s ease-in-out infinite alternate 0.5s; }
+        .unsolved .card-emoji { animation: none; }
         @media (min-width: 640px) { .card-emoji { font-size: 3rem; } } @media (min-width: 768px) { .card-emoji { font-size: 3.5rem; } } @media (min-width: 1024px) { .card-emoji { font-size: 4rem; } }
         .card-title { font-weight: bold; font-size: 1rem; } @media (min-width: 640px) { .card-title { font-size: 1.25rem; } } @media (min-width: 1024px) { .card-title { font-size: 1.5rem; } }
         .trophy-icon { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; animation: trophyGlow 1s ease; }
@@ -107,8 +109,9 @@
         .riddle-container { background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(220, 38, 38, 0.9)); border: 2px solid rgba(30, 58, 138, 0.5); border-radius: 1.5rem; padding: 2rem; position: relative; backdrop-filter: blur(10px); }
         body.light-theme .riddle-container { background: linear-gradient(135deg, rgba(147, 197, 253, 0.9), rgba(249, 168, 212, 0.9)); border-color: rgba(147, 197, 253, 0.5); color: #1f2937; }
         .riddle-container.solved { background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9)); border-color: rgba(16, 185, 129, 0.5); }
+        .riddle-container.unsolved { background: linear-gradient(135deg, rgba(107, 114, 128, 0.9), rgba(75, 85, 99, 0.9)); border-color: rgba(107, 114, 128, 0.5); }
         
-        .back-btn { position: absolute; top: 1rem; left: 1rem; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 0.5rem; padding: 0.5rem 1rem; color: white; cursor: pointer; transition: all 0.3s ease; font-family: inherit; font-size: 1rem; display: flex; align-items: center; justify-content: center; min-width: 60px; min-height: 40px; z-index: 20; /* Ensure button is always clickable */ }
+        .back-btn { position: absolute; top: 1rem; left: 1rem; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 0.5rem; padding: 0.5rem 1rem; color: white; cursor: pointer; transition: all 0.3s ease; font-family: inherit; font-size: 1rem; display: flex; align-items: center; justify-content: center; min-width: 60px; min-height: 40px; z-index: 20; }
         body.light-theme .back-btn { background: rgba(0, 0, 0, 0.1); border-color: rgba(0, 0, 0, 0.2); color: #1f2937; }
         .back-btn:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.05); } body.light-theme .back-btn:hover { background: rgba(0, 0, 0, 0.2); }
         
@@ -148,6 +151,10 @@
         
         /* Confetti */
         .confetti { position: fixed; width: 12px; height: 12px; border-radius: 50%; pointer-events: none; z-index: 1000; animation: confettiFall 3s linear forwards; }
+        
+        /* Unsolved State */
+        .unsolved-message { margin-top: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.2); border-radius: 0.75rem; text-align: center; font-weight: bold; color: #ef4444; }
+        body.light-theme .unsolved-message { background: rgba(0, 0, 0, 0.1); color: #b91c1c; }
         
         /* Responsive adjustments */
         @media (max-width: 640px) {
@@ -213,6 +220,9 @@
                     </div>
                 </div>
                 <div class="feedback hidden" id="feedback"></div>
+                <div class="unsolved-message hidden" id="unsolvedMessage">
+                    This riddle is unsolved. No more tries left! 😢
+                </div>
             </div>
         </div>
     </div>
@@ -254,6 +264,7 @@
         let feedback = riddles.map(() => "");
         let score = 0;
         let solvedRiddles = new Set();
+        let unsolvedRiddles = new Set();
         let isLightTheme = false;
 
         // DOM Elements
@@ -277,6 +288,7 @@
         const winModal = document.getElementById('winModal');
         const loseModal = document.getElementById('loseModal');
         const finalScore = document.getElementById('finalScore');
+        const unsolvedMessage = document.getElementById('unsolvedMessage');
 
         // Initialize Game
         function init() {
@@ -303,16 +315,38 @@
             cardsGrid.innerHTML = '';
             riddles.forEach((riddle, index) => {
                 const card = document.createElement('div');
-                card.className = `riddle-card ${solvedRiddles.has(index) ? 'solved' : ''}`;
-                card.innerHTML = `
-                    <div class="card-overlay"></div>
-                    <div class="card-content">
-                        <div class="card-emoji">${solvedRiddles.has(index) ? '✅' : '🧩'}</div>
-                        <h3 class="card-title">${solvedRiddles.has(index) ? 'Solved!' : `Riddle ${index + 1}`}</h3>
-                        ${solvedRiddles.has(index) ? '<div class="trophy-icon">🏆</div>' : ''}
-                    </div>
-                `;
-                card.addEventListener('click', () => selectCard(index));
+                
+                if (solvedRiddles.has(index)) {
+                    card.className = 'riddle-card solved';
+                    card.innerHTML = `
+                        <div class="card-overlay"></div>
+                        <div class="card-content">
+                            <div class="card-emoji">✅</div>
+                            <h3 class="card-title">Solved!</h3>
+                            <div class="trophy-icon">🏆</div>
+                        </div>
+                    `;
+                } else if (unsolvedRiddles.has(index)) {
+                    card.className = 'riddle-card unsolved';
+                    card.innerHTML = `
+                        <div class="card-overlay"></div>
+                        <div class="card-content">
+                            <div class="card-emoji">❌</div>
+                            <h3 class="card-title">Unsolved</h3>
+                        </div>
+                    `;
+                } else {
+                    card.className = 'riddle-card';
+                    card.innerHTML = `
+                        <div class="card-overlay"></div>
+                        <div class="card-content">
+                            <div class="card-emoji">🧩</div>
+                            <h3 class="card-title">Riddle ${index + 1}</h3>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => selectCard(index));
+                }
+                
                 cardsGrid.appendChild(card);
             });
         }
@@ -332,7 +366,8 @@
         }
 
         function selectCard(index) {
-            if (solvedRiddles.has(index)) return;
+            if (solvedRiddles.has(index) || unsolvedRiddles.has(index)) return;
+            
             selectedCard = index;
             showRiddleView();
             riddleTitle.textContent = `Riddle ${index + 1}`;
@@ -354,7 +389,16 @@
         function showRiddleView() {
             cardsView.classList.add('hidden');
             riddleView.classList.remove('hidden');
-            riddleContainer.classList.toggle('solved', solvedRiddles.has(selectedCard));
+            
+            if (solvedRiddles.has(selectedCard)) {
+                riddleContainer.classList.add('solved');
+                riddleContainer.classList.remove('unsolved');
+            } else if (unsolvedRiddles.has(selectedCard)) {
+                riddleContainer.classList.add('unsolved');
+                riddleContainer.classList.remove('solved');
+            } else {
+                riddleContainer.classList.remove('solved', 'unsolved');
+            }
         }
 
         function normalize(str) {
@@ -362,40 +406,55 @@
         }
 
         function checkAnswer(index) {
-            const userAnswer = normalize(answers[index]);
-            const correctAnswers = riddles[index].a.map(normalize);
-            const isCorrect = correctAnswers.includes(userAnswer);
+    const userAnswer = normalize(answers[index]);
+    const correctAnswers = riddles[index].a.map(normalize);
+    const isCorrect = correctAnswers.includes(userAnswer);
 
-            if (isCorrect) {
-                feedback[index] = "🎉 Correct! Amazing!";
-                solvedRiddles.add(index);
-                score += tries[index] * 10;
-                updateScore();
-                triggerConfetti();
-                setTimeout(() => {
-                    if (solvedRiddles.size === riddles.length) showWinModal();
-                }, 1000);
-            } else {
-                tries[index]--;
-                riddleContainer.classList.add('shake');
-                setTimeout(() => riddleContainer.classList.remove('shake'), 500);
-                feedback[index] = tries[index] > 0 ? 
-                    `💭 Try again! ${tries[index]} tries left` : "💔 No more tries!";
-                if (tries.every(t => t === 0)) {
-                    setTimeout(() => showLoseModal(), 1000);
-                }
+    if (isCorrect) {
+        feedback[index] = "🎉 Correct! Amazing!";
+        solvedRiddles.add(index);
+        score += tries[index] * 10;
+        updateScore();
+        triggerConfetti();
+        setTimeout(() => {
+            if (solvedRiddles.size === riddles.length) {
+                showWinModal();
+            } else if (score <= 60) {
+                showLoseModal();
             }
-            updateFeedback();
-            updateAnswerForm();
-            generateCards();
+        }, 1000);
+    } else {
+        tries[index]--;
+        riddleContainer.classList.add('shake');
+        setTimeout(() => riddleContainer.classList.remove('shake'), 500);
+        
+        if (tries[index] > 0) {
+            feedback[index] = `💭 Try again! ${tries[index]} tries left`;
+        } else {
+            feedback[index] = "💔 No more tries!";
+            unsolvedRiddles.add(index);
+            riddleContainer.classList.add('unsolved');
+            unsolvedMessage.classList.remove('hidden');
         }
 
+        // Check score after any answer (correct or incorrect)
+        if (score <= 60) {
+            setTimeout(() => showLoseModal(), 1000);
+        }
+    }
+    
+    updateFeedback();
+    updateAnswerForm();
+    generateCards();
+}
         function updateAnswerForm() {
             const index = selectedCard;
-            if (solvedRiddles.has(index)) {
+            if (solvedRiddles.has(index) || unsolvedRiddles.has(index)) {
                 answerForm.classList.add('hidden');
+                unsolvedMessage.classList.remove('hidden');
             } else {
                 answerForm.classList.remove('hidden');
+                unsolvedMessage.classList.add('hidden');
                 triesText.textContent = `❤️ Tries left: ${tries[index]}`;
                 submitBtn.disabled = !answers[index].trim();
             }
@@ -438,19 +497,21 @@
         }
 
         function resetGame() {
-            selectedCard = null;
-            tries = riddles.map(() => 3);
-            answers = riddles.map(() => "");
-            feedback = riddles.map(() => "");
-            score = 0;
-            solvedRiddles = new Set();
-            updateScore();
-            generateCards();
-            showCardsView();
-            winModal.classList.remove('show');
-            loseModal.classList.remove('show');
-            feedbackEl.classList.add('hidden');
-        }
+    selectedCard = null;
+    tries = riddles.map(() => 3);
+    answers = riddles.map(() => "");
+    feedback = riddles.map(() => "");
+    score = 0;
+    solvedRiddles = new Set();
+    unsolvedRiddles = new Set();
+    updateScore();
+    generateCards();
+    showCardsView();
+    winModal.classList.remove('show');
+    loseModal.classList.remove('show');
+    feedbackEl.classList.add('hidden');
+    unsolvedMessage.classList.add('hidden');
+}
 
         function toggleTheme() {
             isLightTheme = !isLightTheme;
