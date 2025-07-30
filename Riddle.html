@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riddle Quest - Fun Brain Games for Kids</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Comic Neue', cursive;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #000000, #1e3a8a, #dc2626);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: white;
+            overflow-x: hidden;
+            transition: all 0.5s ease;
+        }
+        body.light-theme {
+            background: linear-gradient(135deg, #ffffff, #93c5fd, #f9a8d4);
+            color: #1f2937;
+        }
+        
+        /* Animations */
+        @keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        @keyframes spin { from { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.2); } to { transform: rotate(360deg) scale(1); } }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+        @keyframes float { from { transform: translateY(0px); } to { transform: translateY(-10px); } }
+        @keyframes bounce { 0%, 100% { transform: scale(1) translateY(0); opacity: 0.5; } 50% { transform: scale(1.5) translateY(-10px); opacity: 1; } }
+        @keyframes floatParticle { 0% { transform: translateY(100vh) translateX(0px) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-100px) translateX(100px) rotate(360deg); opacity: 0; } }
+        @keyframes titleGlow { from { text-shadow: 0 0 20px rgba(255,255,255,0.5); } to { text-shadow: 0 0 40px rgba(255,255,255,0.8); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes cardSlideIn { from { opacity: 0; transform: translateY(50px) rotateY(-90deg); } to { opacity: 1; transform: translateY(0) rotateY(0deg); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-10px) rotate(-2deg); } 75% { transform: translateX(10px) rotate(2deg); } }
+        @keyframes emojiFloat { from { transform: translateY(0px) scale(1); } to { transform: translateY(-5px) scale(1.1); } }
+        @keyframes solvedSpin { from { transform: rotate(0deg) scale(1); } to { transform: rotate(360deg) scale(1.2); } }
+        @keyframes riddleSlideIn { from { opacity: 0; transform: scale(0.8) rotateY(180deg); } to { opacity: 1; transform: scale(1) rotateY(0deg); } }
+        @keyframes riddleEmojiFloat { from { transform: rotate(0deg) scale(1); } to { transform: rotate(10deg) scale(1.1); } }
+        @keyframes formSlideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes feedbackSlideIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes modalEmojiSpin { from { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.3); } to { transform: rotate(360deg) scale(1); } }
+        @keyframes modalEmojiShake { 0%, 100% { transform: rotate(0deg) scale(1); } 25% { transform: rotate(-10deg) scale(1.1); } 75% { transform: rotate(10deg) scale(1.1); } }
+        @keyframes confettiFall { to { transform: translateY(100vh) rotateZ(720deg); opacity: 0; } }
+        
+        /* Loading Screen */
+        .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #000000, #dc2626, #1e3a8a); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; opacity: 1; transition: opacity 1s ease; }
+        .loading-screen.hidden { opacity: 0; pointer-events: none; }
+        .loading-puzzle { font-size: 5rem; animation: spin 2s linear infinite, pulse 1.5s ease-in-out infinite alternate; margin-bottom: 2rem; }
+        .loading-title { font-size: 3.5rem; font-weight: bold; margin-bottom: 2rem; animation: float 1.5s ease-in-out infinite alternate; text-shadow: 0 0 20px rgba(255,255,255,0.5); }
+        .loading-dots { display: flex; gap: 0.5rem; }
+        .loading-dot { width: 1rem; height: 1rem; background: white; border-radius: 50%; animation: bounce 1s ease-in-out infinite; }
+        .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        /* Background Animation */
+        .bg-particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .particle { position: absolute; width: 8px; height: 8px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; animation: floatParticle 10s linear infinite; }
+        body.light-theme .particle { background: rgba(0, 0, 0, 0.1); }
+        
+        /* Header */
+        .header { position: relative; z-index: 10; padding: 1rem; }
+        .header-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .main-title { font-size: 2.5rem; font-weight: bold; animation: titleGlow 2s ease-in-out infinite alternate; }
+        body.light-theme .main-title { color: #1f2937; }
+        .header-controls { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        .score-display { background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border-radius: 2rem; padding: 0.5rem 1rem; font-weight: bold; display: flex; align-items: center; gap: 0.5rem; }
+        body.light-theme .score-display { background: rgba(0, 0, 0, 0.1); color: #1f2937; }
+        .control-btn { background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 0.5rem; padding: 0.5rem; color: white; cursor: pointer; transition: all 0.3s ease; font-size: 1.2rem; }
+        body.light-theme .control-btn { background: rgba(0, 0, 0, 0.1); border-color: rgba(0, 0, 0, 0.2); color: #1f2937; }
+        .control-btn:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.1); }
+        body.light-theme .control-btn:hover { background: rgba(0, 0, 0, 0.2); }
+        
+        /* Game Content */
+        .game-content { position: relative; z-index: 10; padding: 1rem; max-width: 1200px; margin: 0 auto; }
+        .game-intro { text-align: center; font-size: 1.5rem; margin-bottom: 2rem; animation: fadeInUp 1s ease 0.3s both; }
+        body.light-theme .game-intro { color: #1f2937; }
+        
+        /* Card Grid */
+        .cards-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; max-width: 1000px; margin: 0 auto; animation: fadeInScale 1s ease 0.5s both; }
+        @media (min-width: 640px) { .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 2rem; } }
+        @media (min-width: 1024px) { .cards-grid { grid-template-columns: repeat(3, 1fr); } .main-title { font-size: 3.5rem; } }
+        
+        /* Riddle Cards */
+        .riddle-card { height: 12rem; background: linear-gradient(135deg, #1e3a8a, #dc2626); border: 2px solid rgba(30, 58, 138, 0.5); border-radius: 1rem; cursor: pointer; position: relative; overflow: hidden; transition: all 0.3s ease; animation: cardSlideIn 0.6s ease both; perspective: 1000px; }
+        body.light-theme .riddle-card { background: linear-gradient(135deg, #93c5fd, #f9a8d4); border-color: rgba(147, 197, 253, 0.5); }
+        .riddle-card.solved { background: linear-gradient(135deg, #10b981, #059669); border-color: rgba(16, 185, 129, 0.5); }
+        .riddle-card:hover { transform: translateY(-10px) rotateX(5deg) scale(1.05); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); }
+        .riddle-card.shake { animation: shake 0.5s ease; }
+        .riddle-card:nth-child(1) { animation-delay: 0.1s; } .riddle-card:nth-child(2) { animation-delay: 0.2s; } .riddle-card:nth-child(3) { animation-delay: 0.3s; } .riddle-card:nth-child(4) { animation-delay: 0.4s; } .riddle-card:nth-child(5) { animation-delay: 0.5s; } .riddle-card:nth-child(6) { animation-delay: 0.6s; }
+        @media (min-width: 640px) { .riddle-card { height: 14rem; } } @media (min-width: 768px) { .riddle-card { height: 16rem; } } @media (min-width: 1024px) { .riddle-card { height: 18rem; } }
+        
+        .card-overlay { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); }
+        body.light-theme .card-overlay { background: rgba(0, 0, 0, 0.05); }
+        .card-content { position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1rem; color: white; }
+        body.light-theme .card-content { color: #1f2937; }
+        .card-emoji { font-size: 2.5rem; margin-bottom: 1rem; animation: emojiFloat 2s ease-in-out infinite alternate; }
+        .solved .card-emoji { animation: solvedSpin 0.5s ease, emojiFloat 2s ease-in-out infinite alternate 0.5s; }
+        @media (min-width: 640px) { .card-emoji { font-size: 3rem; } } @media (min-width: 768px) { .card-emoji { font-size: 3.5rem; } } @media (min-width: 1024px) { .card-emoji { font-size: 4rem; } }
+        .card-title { font-weight: bold; font-size: 1rem; } @media (min-width: 640px) { .card-title { font-size: 1.25rem; } } @media (min-width: 1024px) { .card-title { font-size: 1.5rem; } }
+        .trophy-icon { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; animation: trophyGlow 1s ease; }
+        @keyframes trophyGlow { from { transform: scale(0) rotate(-180deg); } to { transform: scale(1) rotate(0deg); } }
+        
+        /* Selected Riddle View */
+        .riddle-view { max-width: 600px; margin: 0 auto; animation: riddleSlideIn 0.8s ease both; }
+        .riddle-container { background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(220, 38, 38, 0.9)); border: 2px solid rgba(30, 58, 138, 0.5); border-radius: 1.5rem; padding: 2rem; position: relative; backdrop-filter: blur(10px); }
+        body.light-theme .riddle-container { background: linear-gradient(135deg, rgba(147, 197, 253, 0.9), rgba(249, 168, 212, 0.9)); border-color: rgba(147, 197, 253, 0.5); color: #1f2937; }
+        .riddle-container.solved { background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9)); border-color: rgba(16, 185, 129, 0.5); }
+        
+        .back-btn { position: absolute; top: 1rem; left: 1rem; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 0.5rem; padding: 0.5rem 1rem; color: white; cursor: pointer; transition: all 0.3s ease; font-family: inherit; font-size: 1rem; display: flex; align-items: center; justify-content: center; min-width: 60px; min-height: 40px; z-index: 20; /* Ensure button is always clickable */ }
+        body.light-theme .back-btn { background: rgba(0, 0, 0, 0.1); border-color: rgba(0, 0, 0, 0.2); color: #1f2937; }
+        .back-btn:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.05); } body.light-theme .back-btn:hover { background: rgba(0, 0, 0, 0.2); }
+        
+        .riddle-header { text-align: center; margin-bottom: 2rem; }
+        .riddle-emoji { font-size: 4rem; margin-bottom: 1rem; animation: riddleEmojiFloat 2s ease-in-out infinite alternate; } @media (min-width: 768px) { .riddle-emoji { font-size: 5rem; } }
+        .riddle-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: white; } body.light-theme .riddle-title { color: #1f2937; } @media (min-width: 768px) { .riddle-title { font-size: 2rem; } }
+        .riddle-question { font-size: 1.125rem; line-height: 1.6; opacity: 0.9; color: white; } body.light-theme .riddle-question { color: #1f2937; } @media (min-width: 768px) { .riddle-question { font-size: 1.25rem; } }
+        
+        /* Answer Form */
+        .answer-form { margin-top: 2rem; animation: formSlideIn 1s ease 0.3s both; }
+        .answer-input { width: 100%; padding: 1rem; font-size: 1.125rem; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 0.75rem; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); color: white; margin-bottom: 1rem; transition: all 0.3s ease; font-family: inherit; }
+        body.light-theme .answer-input { background: rgba(0, 0, 0, 0.1); border-color: rgba(0, 0, 0, 0.2); color: #1f2937; }
+        .answer-input::placeholder { color: rgba(255, 255, 255, 0.7); } body.light-theme .answer-input::placeholder { color: rgba(31, 41, 55, 0.7); }
+        .answer-input:focus { outline: none; border-color: rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.25); } body.light-theme .answer-input:focus { border-color: rgba(0, 0, 0, 0.4); background: rgba(0, 0, 0, 0.15); }
+        
+        .submit-btn { width: 100%; background: linear-gradient(135deg, #dc2626, #991b1b); border: none; border-radius: 0.75rem; padding: 1rem; font-size: 1.125rem; font-weight: bold; color: white; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-family: inherit; }
+        body.light-theme .submit-btn { background: linear-gradient(135deg, #f9a8d4, #ec4899); color: #1f2937; }
+        .submit-btn:hover:not(:disabled) { background: linear-gradient(135deg, #991b1b, #7f1d1d); transform: scale(1.05); } body.light-theme .submit-btn:hover:not(:disabled) { background: linear-gradient(135deg, #ec4899, #db2777); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .game-info { text-align: center; margin-top: 1rem; }
+        .hint-text { color: rgba(255, 255, 255, 0.8); margin-bottom: 0.5rem; } body.light-theme .hint-text { color: rgba(31, 41, 55, 0.8); }
+        .tries-text { font-weight: bold; color: white; } body.light-theme .tries-text { color: #1f2937; }
+        
+        .feedback { margin-top: 1.5rem; padding: 1rem; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border-radius: 0.75rem; text-align: center; font-weight: bold; font-size: 1.125rem; animation: feedbackSlideIn 0.5s ease; color: white; } body.light-theme .feedback { background: rgba(0, 0, 0, 0.1); color: #1f2937; }
+        
+        /* Game Over Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+        .modal-overlay.show { opacity: 1; pointer-events: all; }
+        .modal { background: linear-gradient(135deg, #10b981, #059669); padding: 2rem; border-radius: 1.5rem; text-align: center; max-width: 400px; margin: 1rem; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3); transform: scale(0) rotate(-180deg); transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .modal.lose { background: linear-gradient(135deg, #dc2626, #991b1b); }
+        .modal-overlay.show .modal { transform: scale(1) rotate(0deg); }
+        .modal-emoji { font-size: 5rem; margin-bottom: 1rem; animation: modalEmojiSpin 2s linear infinite; } .modal.lose .modal-emoji { animation: modalEmojiShake 1s ease-in-out infinite; }
+        .modal-title { font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem; color: white; }
+        .modal-text { font-size: 1.25rem; margin-bottom: 1.5rem; color: white; }
+        .modal-btn { background: white; color: #10b981; border: none; border-radius: 0.75rem; padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease; font-family: inherit; } .modal.lose .modal-btn { color: #dc2626; } .modal-btn:hover { background: #f3f4f6; transform: scale(1.05); }
+        
+        /* Confetti */
+        .confetti { position: fixed; width: 12px; height: 12px; border-radius: 50%; pointer-events: none; z-index: 1000; animation: confettiFall 3s linear forwards; }
+        
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .header-content { flex-direction: column; text-align: center; }
+            .main-title { font-size: 2rem; }
+            .game-intro { font-size: 1.25rem; }
+            .riddle-container { padding: 1.5rem; }
+            .modal-title { font-size: 2rem; }
+            .riddle-card { height: 14rem; }
+        }
+        
+        /* Utilities */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-puzzle">🧩</div>
+        <h1 class="loading-title">Riddle Quest</h1>
+        <div class="loading-dots">
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+        </div>
+    </div>
+
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <div class="header">
+        <div class="header-content">
+            <h1 class="main-title">🧩 Riddle Quest</h1>
+            <div class="header-controls">
+                <div class="score-display">
+                    <span>⭐</span>
+                    <span>Score: <span id="scoreValue">0</span></span>
+                </div>
+                <button class="control-btn" id="themeToggle" title="Toggle Theme">🌙</button>
+                <button class="control-btn" id="resetBtn" title="Reset Game">🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-content">
+        <div id="cardsView">
+            <p class="game-intro">Choose a riddle card to start your adventure! 🌟</p>
+            <div class="cards-grid" id="cardsGrid"></div>
+        </div>
+
+        <div id="riddleView" class="riddle-view hidden">
+            <div class="riddle-container" id="riddleContainer">
+                <button class="back-btn" id="backBtn">← Back</button>
+                <div class="riddle-header">
+                    <div class="riddle-emoji">🤔</div>
+                    <h2 class="riddle-title" id="riddleTitle">Riddle 1</h2>
+                    <p class="riddle-question" id="riddleQuestion"></p>
+                </div>
+                <div class="answer-form" id="answerForm">
+                    <input type="text" class="answer-input" id="answerInput" placeholder="Type your answer here...">
+                    <button class="submit-btn" id="submitBtn"><span>✨</span><span>Submit Answer</span></button>
+                    <div class="game-info">
+                        <p class="hint-text" id="hintText">💡 Hint: </p>
+                        <p class="tries-text" id="triesText">❤️ Tries left: 3</p>
+                    </div>
+                </div>
+                <div class="feedback hidden" id="feedback"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="winModal">
+        <div class="modal">
+            <div class="modal-emoji">🏆</div>
+            <h2 class="modal-title">YOU WIN!</h2>
+            <p class="modal-text">Amazing job! You solved all the riddles!</p>
+            <p class="modal-text">Final Score: <span id="finalScore">0</span> points! 🌟</p>
+            <button class="modal-btn" onclick="resetGame()">Play Again</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="loseModal">
+        <div class="modal lose">
+            <div class="modal-emoji">😢</div>
+            <h2 class="modal-title">Game Over</h2>
+            <p class="modal-text">Don't give up! Try again and solve those riddles!</p>
+            <button class="modal-btn" onclick="resetGame()">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Data
+        const riddles = [
+            { q: "What has to be broken before you can use it?", a: ["egg", "eggs", "an egg", "the egg", "a egg"], hint: "You crack it for breakfast!" },
+            { q: "I'm tall when I'm young, and I'm short when I'm old. What am I?", a: ["candle", "a candle", "the candle"], hint: "I give light and melt away!" },
+            { q: "What month has 28 days?", a: ["all", "all of them", "every month", "all months"], hint: "Think about what ALL months have!" },
+            { q: "What has many keys but can't open a lock?", a: ["piano", "a piano", "the piano"], hint: "It makes beautiful music!" },
+            { q: "What gets wet while drying?", a: ["towel", "a towel", "the towel"], hint: "You use it after a shower!" },
+            { q: "What has hands but cannot clap?", a: ["clock", "a clock", "the clock"], hint: "It tells you the time!" }
+        ];
+
+        // Game State
+        let selectedCard = null;
+        let tries = riddles.map(() => 3);
+        let answers = riddles.map(() => "");
+        let feedback = riddles.map(() => "");
+        let score = 0;
+        let solvedRiddles = new Set();
+        let isLightTheme = false;
+
+        // DOM Elements
+        const loadingScreen = document.getElementById('loadingScreen');
+        const cardsView = document.getElementById('cardsView');
+        const riddleView = document.getElementById('riddleView');
+        const cardsGrid = document.getElementById('cardsGrid');
+        const scoreValue = document.getElementById('scoreValue');
+        const themeToggle = document.getElementById('themeToggle');
+        const resetBtn = document.getElementById('resetBtn');
+        const backBtn = document.getElementById('backBtn');
+        const riddleContainer = document.getElementById('riddleContainer');
+        const riddleTitle = document.getElementById('riddleTitle');
+        const riddleQuestion = document.getElementById('riddleQuestion');
+        const answerForm = document.getElementById('answerForm');
+        const answerInput = document.getElementById('answerInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const hintText = document.getElementById('hintText');
+        const triesText = document.getElementById('triesText');
+        const feedbackEl = document.getElementById('feedback');
+        const winModal = document.getElementById('winModal');
+        const loseModal = document.getElementById('loseModal');
+        const finalScore = document.getElementById('finalScore');
+
+        // Initialize Game
+        function init() {
+            setTimeout(() => loadingScreen.classList.add('hidden'), 2000);
+            createParticles();
+            generateCards();
+            addEventListeners();
+            updateScore();
+        }
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('bgParticles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function generateCards() {
+            cardsGrid.innerHTML = '';
+            riddles.forEach((riddle, index) => {
+                const card = document.createElement('div');
+                card.className = `riddle-card ${solvedRiddles.has(index) ? 'solved' : ''}`;
+                card.innerHTML = `
+                    <div class="card-overlay"></div>
+                    <div class="card-content">
+                        <div class="card-emoji">${solvedRiddles.has(index) ? '✅' : '🧩'}</div>
+                        <h3 class="card-title">${solvedRiddles.has(index) ? 'Solved!' : `Riddle ${index + 1}`}</h3>
+                        ${solvedRiddles.has(index) ? '<div class="trophy-icon">🏆</div>' : ''}
+                    </div>
+                `;
+                card.addEventListener('click', () => selectCard(index));
+                cardsGrid.appendChild(card);
+            });
+        }
+
+        function addEventListeners() {
+            themeToggle.addEventListener('click', toggleTheme);
+            resetBtn.addEventListener('click', resetGame);
+            backBtn.addEventListener('click', showCardsView);
+            submitBtn.addEventListener('click', () => checkAnswer(selectedCard));
+            answerInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') checkAnswer(selectedCard);
+            });
+            answerInput.addEventListener('input', (e) => {
+                answers[selectedCard] = e.target.value;
+                submitBtn.disabled = !e.target.value.trim();
+            });
+        }
+
+        function selectCard(index) {
+            if (solvedRiddles.has(index)) return;
+            selectedCard = index;
+            showRiddleView();
+            riddleTitle.textContent = `Riddle ${index + 1}`;
+            riddleQuestion.textContent = riddles[index].q;
+            hintText.textContent = `💡 Hint: ${riddles[index].hint}`;
+            triesText.textContent = `❤️ Tries left: ${tries[index]}`;
+            answerInput.value = answers[index];
+            answerInput.focus();
+            updateAnswerForm();
+            updateFeedback();
+        }
+
+        function showCardsView() {
+            selectedCard = null;
+            cardsView.classList.remove('hidden');
+            riddleView.classList.add('hidden');
+        }
+
+        function showRiddleView() {
+            cardsView.classList.add('hidden');
+            riddleView.classList.remove('hidden');
+            riddleContainer.classList.toggle('solved', solvedRiddles.has(selectedCard));
+        }
+
+        function normalize(str) {
+            return str.replace(/\b(a|an|the)\b/g, '').trim().toLowerCase();
+        }
+
+        function checkAnswer(index) {
+            const userAnswer = normalize(answers[index]);
+            const correctAnswers = riddles[index].a.map(normalize);
+            const isCorrect = correctAnswers.includes(userAnswer);
+
+            if (isCorrect) {
+                feedback[index] = "🎉 Correct! Amazing!";
+                solvedRiddles.add(index);
+                score += tries[index] * 10;
+                updateScore();
+                triggerConfetti();
+                setTimeout(() => {
+                    if (solvedRiddles.size === riddles.length) showWinModal();
+                }, 1000);
+            } else {
+                tries[index]--;
+                riddleContainer.classList.add('shake');
+                setTimeout(() => riddleContainer.classList.remove('shake'), 500);
+                feedback[index] = tries[index] > 0 ? 
+                    `💭 Try again! ${tries[index]} tries left` : "💔 No more tries!";
+                if (tries.every(t => t === 0)) {
+                    setTimeout(() => showLoseModal(), 1000);
+                }
+            }
+            updateFeedback();
+            updateAnswerForm();
+            generateCards();
+        }
+
+        function updateAnswerForm() {
+            const index = selectedCard;
+            if (solvedRiddles.has(index)) {
+                answerForm.classList.add('hidden');
+            } else {
+                answerForm.classList.remove('hidden');
+                triesText.textContent = `❤️ Tries left: ${tries[index]}`;
+                submitBtn.disabled = !answers[index].trim();
+            }
+        }
+
+        function updateFeedback() {
+            const index = selectedCard;
+            if (feedback[index]) {
+                feedbackEl.textContent = feedback[index];
+                feedbackEl.classList.remove('hidden');
+            } else {
+                feedbackEl.classList.add('hidden');
+            }
+        }
+
+        function updateScore() {
+            scoreValue.textContent = score;
+        }
+
+        function triggerConfetti() {
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 80%, 60%)`;
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function showWinModal() {
+            finalScore.textContent = score;
+            winModal.classList.add('show');
+        }
+
+        function showLoseModal() {
+            loseModal.classList.add('show');
+        }
+
+        function resetGame() {
+            selectedCard = null;
+            tries = riddles.map(() => 3);
+            answers = riddles.map(() => "");
+            feedback = riddles.map(() => "");
+            score = 0;
+            solvedRiddles = new Set();
+            updateScore();
+            generateCards();
+            showCardsView();
+            winModal.classList.remove('show');
+            loseModal.classList.remove('show');
+            feedbackEl.classList.add('hidden');
+        }
+
+        function toggleTheme() {
+            isLightTheme = !isLightTheme;
+            document.body.classList.toggle('light-theme', isLightTheme);
+            themeToggle.textContent = isLightTheme ? '☀️' : '🌙';
+        }
+
+        // Initialize the game when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
